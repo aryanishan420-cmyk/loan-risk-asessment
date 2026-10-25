@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisCredit AI - Intelligent Loan Risk Assessment System</title>
+    <meta name="description" content="Enterprise machine learning decision support system for banking loan default prediction, risk tiering, and SQL credit analytics.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+                        <path d="M9 12l2 2 4-4" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-title">AegisCredit<span class="accent-dot">.</span>AI</h1>
+                    <p class="brand-subtitle">Loan Risk Decision Support</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="tab-overview" id="btn-tab-overview">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Portfolio Analytics</span>
+                </button>
+                <button class="nav-item" data-tab="tab-assessor" id="btn-tab-assessor">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                    <span>Risk Underwriter</span>
+                </button>
+                <button class="nav-item" data-tab="tab-sql" id="btn-tab-sql">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                    <span>SQL Query Studio</span>
+                </button>
+                <button class="nav-item" data-tab="tab-models" id="btn-tab-models">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Model Performance</span>
+                </button>
+                <button class="nav-item" data-tab="tab-stress" id="btn-tab-stress">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                    <span>Stress Testing</span>
+                </button>
+                <button class="nav-item" data-tab="tab-pipeline" id="btn-tab-pipeline">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <span>Architecture & Docs</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">ML Engine Active (v2.4)</span>
+                </div>
+                <div class="db-pill">SQLite: 12,000 Records</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="topbar">
+                <div class="topbar-title-wrap">
+                    <h2 class="view-title" id="current-view-title">Portfolio Analytics & Risk Overview</h2>
+                    <p class="view-desc" id="current-view-desc">Real-time credit exposure metrics and default probability analytics</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="live-clock" id="live-clock">--:--:-- UTC</div>
+                    <button class="btn btn-primary" id="btn-quick-assess">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                        New Assessment
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- TAB 1: PORTFOLIO OVERVIEW -->
+                <section class="tab-pane active" id="tab-overview">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Total Portfolio Exposure</span>
+                                <span class="metric-icon green">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                </span>
+                            </div>
+                            <div class="metric-value" id="kpi-exposure">$186,587,000</div>
+                            <div class="metric-footer positive">
+                                <span>↑ 100% Verified in SQLite</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Total Active Facilities</span>
+                                <span class="metric-icon blue">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </span>
+                            </div>
+                            <div class="metric-value" id="kpi-total-loans">12,000</div>
+                            <div class="metric-footer neutral">
+                                <span>Across Grades A - F</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Portfolio Default Rate</span>
+                                <span class="metric-icon red">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                </span>
+                            </div>
+                            <div class="metric-value" id="kpi-default-rate">22.57%</div>
+                            <div class="metric-footer warning">
+                                <span>Optimal Threshold: 0.395</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Mean FICO Credit Score</span>
+                                <span class="metric-icon purple">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                </span>
+                            </div>
+                            <div class="metric-value" id="kpi-avg-fico">672.4</div>
+                            <div class="metric-footer positive">
+                                <span>Avg Rate: 14.86% APR</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="grid-2-cols">
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Default Rate by Loan Rating Grade</h3>
+                                    <p class="card-desc">Empirical default probability across prime to subprime tiers</p>
+                                </div>
+                                <span class="badge badge-outline">Live SQL Aggregate</span>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-grade-defaults"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Loan Capital Allocation (USD Exposure)</h3>
+                                    <p class="card-desc">Volume of capital distributed per rating tranche</p>
+                                </div>
+                                <span class="badge badge-outline">Portfolio Weights</span>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-exposure-donut"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Audit Evaluations Table -->
+                    <div class="table-card mt-6">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Live Underwriting Audit Trail</h3>
+                                <p class="card-desc">Audited decisions logged into SQLite database table <code>risk_evaluations</code></p>
+                            </div>
+                            <button class="btn btn-sm btn-secondary" id="btn-refresh-audit">Refresh Audit</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="table-audit-log">
+                                <thead>
+                                    <tr>
+                                        <th>Audit ID</th>
+                                        <th>Applicant ID</th>
+                                        <th>Model Version</th>
+                                        <th>Default Prob</th>
+                                        <th>Risk Tier</th>
+                                        <th>Recommended Decision</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">Loading audit entries...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: LOAN RISK ASSESSOR / UNDERWRITER CONSOLE -->
+                <section class="tab-pane" id="tab-assessor">
+                    <!-- Persona Quick Presets -->
+                    <div class="preset-bar">
+                        <span class="preset-label">⚡ 1-Click Persona Simulator:</span>
+                        <div class="preset-chips" id="preset-container">
+                            <button class="preset-chip active" data-preset="0">Prime Executive ($135k, 785 FICO)</button>
+                            <button class="preset-chip" data-preset="1">Debt Consolidation ($62k, 695 FICO)</button>
+                            <button class="preset-chip" data-preset="2">Stressed Borrower ($38k, 590 FICO)</button>
+                            <button class="preset-chip" data-preset="3">Subprime Business ($42k, 540 FICO)</button>
+                        </div>
+                    </div>
+
+                    <div class="assessor-grid">
+                        <!-- Input Parameters Form -->
+                        <div class="card form-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Loan Applicant Parameters</h3>
+                                    <p class="card-desc">Enter demographic, loan terms and credit bureau data</p>
+                                </div>
+                                <button class="btn btn-sm btn-outline" id="btn-reset-form">Reset</button>
+                            </div>
+
+                            <form id="loan-assessment-form" class="form-body">
+                                <div class="form-section-title">Personal & Employment Profile</div>
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label for="inp-age">Age (Years)</label>
+                                        <input type="number" id="inp-age" class="form-control" value="38" min="18" max="75">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-income">Annual Income ($)</label>
+                                        <input type="number" id="inp-income" class="form-control" value="85000" min="10000" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-emp-len">Employment (Years)</label>
+                                        <input type="number" id="inp-emp-len" class="form-control" value="6" min="0" max="40">
+                                    </div>
+                                </div>
+
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="inp-home">Home Ownership</label>
+                                        <select id="inp-home" class="form-control">
+                                            <option value="MORTGAGE" selected>MORTGAGE</option>
+                                            <option value="RENT">RENT</option>
+                                            <option value="OWN">OWN</option>
+                                            <option value="OTHER">OTHER</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-intent">Loan Purpose</label>
+                                        <select id="inp-intent" class="form-control">
+                                            <option value="DEBT_CONSOLIDATION" selected>DEBT CONSOLIDATION</option>
+                                            <option value="CREDIT_CARD">CREDIT CARD REFINANCE</option>
+                                            <option value="HOME_IMPROVEMENT">HOME IMPROVEMENT</option>
+                                            <option value="SMALL_BUSINESS">SMALL BUSINESS</option>
+                                            <option value="MEDICAL">MEDICAL EMERGENCY</option>
+                                            <option value="EDUCATION">EDUCATION</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-title">Requested Facility Details</div>
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label for="inp-amount">Loan Amount ($)</label>
+                                        <input type="number" id="inp-amount" class="form-control" value="20000" min="1000" step="500">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-term">Loan Term</label>
+                                        <select id="inp-term" class="form-control">
+                                            <option value="36" selected>36 Months (3 Years)</option>
+                                            <option value="60">60 Months (5 Years)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-grade">Credit Rating Grade</label>
+                                        <select id="inp-grade" class="form-control">
+                                            <option value="A">Grade A (Prime)</option>
+                                            <option value="B" selected>Grade B (Near-Prime)</option>
+                                            <option value="C">Grade C (Standard)</option>
+                                            <option value="D">Grade D (Subprime)</option>
+                                            <option value="E">Grade E (High Risk)</option>
+                                            <option value="F">Grade F (Speculative)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="inp-rate">Interest Rate (% APR)</label>
+                                        <input type="number" id="inp-rate" class="form-control" value="11.5" min="4" max="36" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-credit-score">FICO Credit Score (300 - 850)</label>
+                                        <input type="number" id="inp-credit-score" class="form-control" value="715" min="300" max="850">
+                                    </div>
+                                </div>
+
+                                <div class="form-section-title">Credit Bureau & Leverage Metrics</div>
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label for="inp-dti">Debt-to-Income DTI (%)</label>
+                                        <input type="number" id="inp-dti" class="form-control" value="18.5" min="1" max="75" step="0.5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-util">Revolving Util (%)</label>
+                                        <input type="number" id="inp-util" class="form-control" value="34.0" min="0" max="100" step="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-hist-len">Credit History (Yrs)</label>
+                                        <input type="number" id="inp-hist-len" class="form-control" value="12" min="1" max="45">
+                                    </div>
+                                </div>
+
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label for="inp-delinq">Delinquencies (2 Yrs)</label>
+                                        <input type="number" id="inp-delinq" class="form-control" value="0" min="0" max="10">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-pub-rec">Public Derogatory</label>
+                                        <input type="number" id="inp-pub-rec" class="form-control" value="0" min="0" max="5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inp-inq">Inquiries (Last 6 Mo)</label>
+                                        <input type="number" id="inp-inq" class="form-control" value="1" min="0" max="10">
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-primary btn-block mt-4" id="btn-run-inference">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    Execute Risk Assessment
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Decision & Explainability Panel -->
+                        <div class="card result-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Underwriting Decision Support</h3>
+                                    <p class="card-desc">Machine Learning evaluation & explainable drivers</p>
+                                </div>
+                                <span class="badge badge-glow" id="res-model-badge">Logistic Regression</span>
+                            </div>
+
+                            <div class="result-body">
+                                <!-- Big Gauge & Risk Tier -->
+                                <div class="decision-hero">
+                                    <div class="gauge-container">
+                                        <svg class="gauge-svg" viewBox="0 0 120 120">
+                                            <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                            <circle class="gauge-progress" id="gauge-circle" cx="60" cy="60" r="50"></circle>
+                                        </svg>
+                                        <div class="gauge-content">
+                                            <span class="gauge-percent" id="res-prob-pct">18.4%</span>
+                                            <span class="gauge-label">Default Risk</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="decision-meta">
+                                        <div class="decision-badge badge-approve" id="res-decision-badge">
+                                            AUTO-APPROVE
+                                        </div>
+                                        <h4 class="risk-tier-title" id="res-risk-tier">Tier 2: Near Prime Moderate</h4>
+                                        <p class="risk-tier-desc" id="res-tier-desc">Application meets prime credit risk profile threshold.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Recommended Terms -->
+                                <div class="terms-grid">
+                                    <div class="term-item">
+                                        <span class="term-label">Offered APR Rate</span>
+                                        <span class="term-val" id="res-offered-rate">11.5%</span>
+                                    </div>
+                                    <div class="term-item">
+                                        <span class="term-label">Max Approved Exposure</span>
+                                        <span class="term-val" id="res-max-amt">$20,000</span>
+                                    </div>
+                                    <div class="term-item">
+                                        <span class="term-label">Repayment Probability</span>
+                                        <span class="term-val text-green" id="res-repay-prob">81.6%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Factor Attribution (SHAP-style explainability) -->
+                                <div class="explainability-section">
+                                    <h4 class="section-subtitle">Explainable Risk Factor Drivers</h4>
+                                    <div class="factors-list" id="res-factors-list">
+                                        <!-- Dynamically injected -->
+                                        <div class="factor-item factor-pos">
+                                            <span class="factor-icon">✓</span>
+                                            <span class="factor-name">Balanced Financial and Credit Metrics</span>
+                                            <span class="factor-impact">Low Default Impact</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="audit-confirmation">
+                                    <span>Audited & Stored in SQLite</span>
+                                    <span class="applicant-id-tag" id="res-audit-id">ID: LN-LIVE-9021</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: SQL QUERY STUDIO -->
+                <section class="tab-pane" id="tab-sql">
+                    <div class="card sql-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">SQL Credit Analytics Console</h3>
+                                <p class="card-desc">Query normalized relational tables (<code>applicants</code>, <code>loans</code>, <code>credit_profiles</code>, <code>risk_evaluations</code>)</p>
+                            </div>
+                            <span class="badge badge-outline">SQLite Engine</span>
+                        </div>
+
+                        <!-- Snippets -->
+                        <div class="sql-snippets">
+                            <span class="snippet-label">Pre-built Queries:</span>
+                            <button class="btn btn-xs btn-chip" data-sql="SELECT * FROM vw_portfolio_risk_summary;">Portfolio Summary View</button>
+                            <button class="btn btn-xs btn-chip" data-sql="SELECT applicant_id, annual_income, loan_amount, loan_grade, credit_score, dti, delinquencies_2yrs FROM vw_high_risk_pipeline LIMIT 15;">High Risk Watchlist</button>
+                            <button class="btn btn-xs btn-chip" data-sql="SELECT l.loan_intent, COUNT(*) AS count, ROUND(AVG(l.loan_amount), 2) AS avg_amount, ROUND(AVG(l.interest_rate), 2) AS avg_rate, ROUND(AVG(l.loan_status) * 100, 2) AS default_rate_pct FROM loans l GROUP BY l.loan_intent ORDER BY default_rate_pct DESC;">Default Rate by Loan Purpose</button>
+                            <button class="btn btn-xs btn-chip" data-sql="SELECT * FROM risk_evaluations ORDER BY evaluated_at DESC LIMIT 20;">Recent Model Inferences</button>
+                        </div>
+
+                        <div class="sql-editor-container">
+                            <textarea id="sql-input-query" class="sql-textarea" rows="4">SELECT * FROM vw_portfolio_risk_summary;</textarea>
+                        </div>
+
+                        <div class="sql-action-bar">
+                            <div class="sql-stats" id="sql-stats-bar">
+                                Ready to execute query.
+                            </div>
+                            <div class="sql-buttons">
+                                <button class="btn btn-secondary" id="btn-export-csv" disabled>Export CSV</button>
+                                <button class="btn btn-primary" id="btn-execute-sql">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    Run Query
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Query Results Table -->
+                        <div class="table-responsive mt-4">
+                            <table class="data-table" id="table-sql-results">
+                                <thead>
+                                    <tr><th>Results will appear here</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="text-muted">Click 'Run Query' to inspect data.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: MODEL PERFORMANCE -->
+                <section class="tab-pane" id="tab-models">
+                    <div class="models-grid">
+                        <div class="model-summary-card">
+                            <div class="model-badge champion">CHAMPION MODEL</div>
+                            <h3 class="model-name">Logistic Regression</h3>
+                            <div class="metric-mini-grid">
+                                <div><span class="label">ROC-AUC:</span> <strong id="m-lr-auc">0.7889</strong></div>
+                                <div><span class="label">PR-AUC:</span> <strong id="m-lr-pr">0.5544</strong></div>
+                                <div><span class="label">Recall:</span> <strong id="m-lr-rec">83.39%</strong></div>
+                                <div><span class="label">Cost-Optimal Thresh:</span> <strong>0.395</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="model-summary-card">
+                            <div class="model-badge challenger">CHALLENGER 1</div>
+                            <h3 class="model-name">Random Forest</h3>
+                            <div class="metric-mini-grid">
+                                <div><span class="label">ROC-AUC:</span> <strong id="m-rf-auc">0.7663</strong></div>
+                                <div><span class="label">PR-AUC:</span> <strong id="m-rf-pr">0.4763</strong></div>
+                                <div><span class="label">Recall:</span> <strong id="m-rf-rec">69.74%</strong></div>
+                                <div><span class="label">Cost-Optimal Thresh:</span> <strong>0.435</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="model-summary-card">
+                            <div class="model-badge challenger">CHALLENGER 2</div>
+                            <h3 class="model-name">LightGBM</h3>
+                            <div class="metric-mini-grid">
+                                <div><span class="label">ROC-AUC:</span> <strong id="m-lgb-auc">0.7616</strong></div>
+                                <div><span class="label">PR-AUC:</span> <strong id="m-lgb-pr">0.4972</strong></div>
+                                <div><span class="label">Recall:</span> <strong id="m-lgb-rec">67.90%</strong></div>
+                                <div><span class="label">Cost-Optimal Thresh:</span> <strong>0.465</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Visualizations -->
+                    <div class="grid-2-cols mt-6">
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">ROC Curve (Receiver Operating Characteristic)</h3>
+                                    <p class="card-desc">True Positive Rate vs False Positive Rate across decision thresholds</p>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-roc-curves"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Top 10 Predictor Feature Weights</h3>
+                                    <p class="card-desc">Most influential financial parameters driving default risk</p>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-feature-importance"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 5: STRESS TESTING -->
+                <section class="tab-pane" id="tab-stress">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Macroeconomic Scenario Stress Testing Simulator</h3>
+                                <p class="card-desc">Simulate severe economic shocks (Fed rate hikes, stagflation, unemployment) on the active loan portfolio</p>
+                            </div>
+                            <span class="badge badge-warning">Basel III Framework</span>
+                        </div>
+
+                        <div class="stress-controls-grid">
+                            <div class="stress-control-item">
+                                <label for="stress-rate">Interest Rate Shock (+APR %)</label>
+                                <div class="slider-val-wrap">
+                                    <input type="range" id="stress-rate" min="0" max="6" step="0.5" value="2.5">
+                                    <span class="slider-display" id="stress-rate-val">+2.5%</span>
+                                </div>
+                                <span class="control-note">Tightening monetary policy / liquidity squeeze</span>
+                            </div>
+
+                            <div class="stress-control-item">
+                                <label for="stress-income">Income Contraction Shock (%)</label>
+                                <div class="slider-val-wrap">
+                                    <input type="range" id="stress-income" min="-30" max="0" step="5" value="-15">
+                                    <span class="slider-display" id="stress-income-val">-15%</span>
+                                </div>
+                                <span class="control-note">Recessionary wage cuts & unemployment</span>
+                            </div>
+
+                            <div class="stress-control-item">
+                                <label for="stress-dti">Debt Inflation Shock (% DTI Surge)</label>
+                                <div class="slider-val-wrap">
+                                    <input type="range" id="stress-dti" min="0" max="40" step="5" value="20">
+                                    <span class="slider-display" id="stress-dti-val">+20%</span>
+                                </div>
+                                <span class="control-note">Living cost spikes and revolving credit drain</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="btn btn-warning" id="btn-run-stress">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                                Execute Stress Test Simulation
+                            </button>
+                        </div>
+
+                        <!-- Stress Results -->
+                        <div class="stress-results-box mt-6" id="stress-results-box">
+                            <div class="stress-kpi-grid">
+                                <div class="stress-kpi">
+                                    <span class="label">Base Portfolio Default Rate</span>
+                                    <span class="val text-green" id="res-base-def">22.5%</span>
+                                </div>
+                                <div class="stress-kpi">
+                                    <span class="label">Stressed Default Rate</span>
+                                    <span class="val text-red" id="res-stress-def">36.8%</span>
+                                </div>
+                                <div class="stress-kpi">
+                                    <span class="label">Delta Risk Surge</span>
+                                    <span class="val text-amber" id="res-delta-def">+14.3%</span>
+                                </div>
+                                <div class="stress-kpi">
+                                    <span class="label">Estimated Capital Loss Shock</span>
+                                    <span class="val text-red" id="res-loss-surge">+$3,420,000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 6: ARCHITECTURE & DOCS -->
+                <section class="tab-pane" id="tab-pipeline">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">End-to-End System Architecture</h3>
+                                <p class="card-desc">From raw banking data to machine learning decision support</p>
+                            </div>
+                            <span class="badge badge-success">Production Ready</span>
+                        </div>
+
+                        <div class="arch-flow">
+                            <div class="flow-step">
+                                <div class="step-num">1</div>
+                                <h4>Data Collection & Generation</h4>
+                                <p>12,000 synthetic loans with realistic statistical distributions (FICO, DTI, Employment, Delinquencies).</p>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <div class="step-num">2</div>
+                                <h4>Relational SQLite Database</h4>
+                                <p>Normalized 3NF relational schema with <code>applicants</code>, <code>loans</code>, <code>credit_profiles</code>, and analytical views.</p>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <div class="step-num">3</div>
+                                <h4>Feature Engineering Pipeline</h4>
+                                <p>Payment-to-Income (PTI), Loan-to-Income (LTI), Debt Utilization Stress Index, and Delinquency Tenure frequency.</p>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <div class="step-num">4</div>
+                                <h4>ML Models & Cost Optimization</h4>
+                                <p>Trained Logistic Regression, Random Forest, LightGBM with asymmetric cost matrix minimizing default loss.</p>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <div class="step-num">5</div>
+                                <h4>Decision Support & Explainability</h4>
+                                <p>Live decision tiering (Auto-Approve, Standard, Review, Reject) with explainable risk drivers.</p>
+                            </div>
+                        </div>
+
+                        <div class="docs-section mt-6">
+                            <h3>Key Technical Highlights for Academic Evaluation</h3>
+                            <ul class="docs-list">
+                                <li><strong>Probability Calibration & Cost-Benefit Thresholding:</strong> Rather than arbitrary 0.5 threshold, an asymmetric loss threshold (FN cost = 4x FP cost) is derived, optimizing financial return and reducing default rates.</li>
+                                <li><strong>Relational Database Integration:</strong> Direct SQLite execution with pre-compiled views and automated logging of all prediction transactions for compliance audit trails.</li>
+                                <li><strong>Explainable AI (XAI):</strong> Each credit decision displays a factor attribution breakdown indicating specific strengths (e.g. low DTI, high FICO) and vulnerabilities (e.g. recent inquiries, delinquencies).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
